@@ -46,30 +46,84 @@ module.exports = {
            console.log(error)
        }
    },
+ comparePNR: async (req, res) => {
+    try {
+      const { pnr } = req.body; // Get PNR from request body
 
-   // Get all active PNRs from ticket database
-   getActivePnrList: async (req, res) => {
-       try {
-           const tickets = await TicketModel.find({ 
-               isActive: true, 
-               isDeleted: false 
-           }).select('pnr source destination date');
-           
-           res.status(200).json({
-               success: true,
-               message: "PNR list fetched successfully",
-               statusCode: 200,
-               data: tickets
-           });
-       } catch (error) {
-           res.status(500).json({
-               success: false,
-               message: "Internal Server Error",
-               statusCode: 500,
-               error: error.message
-           });
-       }
-   }
+      if (!pnr) {
+        return res.status(400).json({
+          success: false,
+          message: 'PNR is required in the request body.'
+        });
+      }
+
+      // Check if the PNR exists in the accident database
+      const accident = await AccidentModel.findOne({ pnr: pnr });
+
+      if (accident) {
+        return res.status(200).json({
+          success: true,
+          match: true,
+          message: 'PNR found in accident database.'
+        });
+      } else {
+        return res.status(200).json({
+          success: true,
+          match: false,
+          message: 'PNR not found in accident database.'
+        });
+      }
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Internal Server Error',
+        error: error.message
+      });
+    }
+  },
+  checkAccidentPNR: async (req, res) => {
+    try {
+      const { pnr } = req.params; // Get PNR from URL parameters
+
+      if (!pnr) {
+        return res.status(400).json({
+          success: false,
+          message: 'PNR is required in the URL parameters.'
+        });
+      }
+
+      // Check if the PNR exists in any accident record's PNR array
+      const accident = await AccidentModel.findOne({ 
+        pnr: { $in: [pnr] },
+        isActive: true,
+        isDeleted: false
+      });
+
+      if (accident) {
+        return res.status(200).json({
+          success: true,
+          exists: true,
+          message: 'PNR found in accident database.',
+          accidentId: accident._id,
+          location: accident.location,
+          accidentDate: accident.accidentDate
+        });
+      } else {
+        return res.status(200).json({
+          success: true,
+          exists: false,
+          message: 'PNR not found in accident database.'
+        });
+      }
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Internal Server Error',
+        error: error.message
+      });
+    }
+  }
+   
    
 };
 

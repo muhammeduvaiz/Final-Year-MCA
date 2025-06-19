@@ -1,6 +1,49 @@
-import React from 'react'
+import React, { useState } from 'react'
 import bgImage from '../image/background.png'  
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
+
 function ALogin() {
+  const navigate = useNavigate()
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    })
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+
+    try {
+      const response = await axios.post('http://localhost:5000/admin/login', formData, {
+        withCredentials: true
+      })
+
+      if (response.data.message === "admin login successfull") {
+        // Store admin info in localStorage or state management
+        localStorage.setItem('adminInfo', JSON.stringify(response.data.adminExist))
+        navigate('/adashboard')
+      } else {
+        setError('Login failed. Please check your credentials.')
+      }
+    } catch (error) {
+      console.error('Login error:', error)
+      setError(error.response?.data?.error || 'Login failed. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div
       style={{
@@ -26,8 +69,11 @@ function ALogin() {
       >
         <h1 style={{ textAlign: 'center' }}>KSRTC ADMIN LOGIN</h1>
         <div style={{
-          border: '1px solid #ccc', padding: '20px', borderRadius: '5px', background: '#fff', padding: '20px',
-
+          border: '1px solid #ccc', 
+          padding: '20px', 
+          borderRadius: '5px', 
+          background: '#fff', 
+          padding: '20px',
           background: 'rgba(255, 255, 255, 0)',
           borderRadius: '16px',
           boxShadow: '0 8px 32px 0 rgba(30, 36, 116, 0.37)',
@@ -35,7 +81,21 @@ function ALogin() {
           border: '1px solid rgba(255,255,255,0.18)'
         }}>
           <h2>Login</h2>
+          {error && (
+            <div style={{
+              backgroundColor: 'rgba(220, 53, 69, 0.1)',
+              color: '#dc3545',
+              padding: '10px',
+              borderRadius: '5px',
+              marginBottom: '15px',
+              textAlign: 'center',
+              border: '1px solid #dc3545'
+            }}>
+              {error}
+            </div>
+          )}
           <form
+            onSubmit={handleSubmit}
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -47,25 +107,42 @@ function ALogin() {
                 flexDirection: 'column', 
                 alignItems: 'center', 
                 width: '100%' }}>
-              <label htmlFor="username" style={{ marginBottom: '5px' }}>Admin ID :</label>
-              <input type="text" id="username" name="username" required style={{ width: '90%', padding: '8px' }} />
+              <label htmlFor="email" style={{ marginBottom: '5px' }}>Admin Email :</label>
+              <input 
+                type="email" 
+                id="email" 
+                name="email" 
+                value={formData.email}
+                onChange={handleChange}
+                required 
+                style={{ width: '90%', padding: '8px' }} 
+              />
             </div>
             <div style={{ display: 'flex', 
                 flexDirection: 'column', 
                 alignItems: 'center', 
                 width: '100%' }}>
               <label htmlFor="password" style={{ marginBottom: '5px' }}>Password :</label>
-              <input type="password" id="password" name="password" required style={{ width: '90%', padding: '8px' }} />
+              <input 
+                type="password" 
+                id="password" 
+                name="password" 
+                value={formData.password}
+                onChange={handleChange}
+                required 
+                style={{ width: '90%', padding: '8px' }} 
+              />
             </div>
             <button
               type="submit"
+              disabled={loading}
               style={{
-                backgroundColor: 'red',
+                backgroundColor: loading ? '#6c757d' : 'red',
                 color: '#fff',
                 border: 'none',
                 padding: '10px',
                 borderRadius: '4px',
-                cursor: 'pointer',
+                cursor: loading ? 'not-allowed' : 'pointer',
                 width: '100%',
                 display: 'flex',
                 justifyContent: 'center',
@@ -75,7 +152,7 @@ function ALogin() {
                 marginTop: '20px' 
               }}
             >
-              Login
+              {loading ? 'Logging in...' : 'Login'}
             </button>
           </form>
         </div>

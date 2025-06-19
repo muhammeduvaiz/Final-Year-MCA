@@ -7,6 +7,7 @@ import TVerification from './Components/User/TVerification'
 import AccidentReport from './Components/User/AccidentReport'
 import Rrt from './Components/User/Rrt'
 import ADashboard from './Components/Admin/ADashboard'
+import ManageUsers from './Components/Admin/ManageUsers'
 import TicketDetails from './Components/User/TicketDetails'
 import {BrowserRouter,Routes,Route} from 'react-router-dom'
 function App() {
@@ -22,6 +23,7 @@ function App() {
           <Route path='/accidentreport' element={<AccidentReport/>}/>
           <Route path='/rrt' element={<Rrt/>}/>
           <Route path='/adashboard' element={<ADashboard/>}/>
+          <Route path='/manageusers' element={<ManageUsers/>}/>
           <Route path='/ticketdetails' element={<TicketDetails/>}/>
         </Routes>
       </BrowserRouter>

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
-const mongouri =  process.env.MONGO_URI ; // Default to local MongoDB if not set
+const mongouri = process.env.MONGO_URI 
 // Connect to MongoDB using Mongoose
 mongoose.connect(mongouri)
 .then(() => {

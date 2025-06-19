@@ -1,14 +1,14 @@
-const TicketvriModel = require('../Models/accidentvriModel');
+const TicketvriModel = require('../Models/ticketvriModel');
 
 module.exports = {
-    addTicketvri: async (req, res) => {
+    ticketveri: async (req, res) => {
         try {
-            const { pnr, busNumber, accidentDate } = req.body;
-            const ticketvri = new TicketvriModel({ pnr, busNumber, accidentDate });
-            await ticketvri.save();
+            const { pnr } = req.body;
+            const ticketveri = new TicketvriModel({ pnr });
+            await ticketveri.save();
             res.status(200).json({
                 success: true,
-                message: "Ticketvri added successfully",
+                message: "Ticket verified successfully",
                 statusCode: 200,
                 ticketvri
             });

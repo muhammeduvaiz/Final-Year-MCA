@@ -1,8 +1,31 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import bgImage from '../image/background.png'
 import { Link } from 'react-router-dom'
 
 const Dashboard = () => {
+  const navigate = useNavigate()
+  const [userInfo, setUserInfo] = useState(null)
+
+  useEffect(() => {
+    const storedUserInfo = localStorage.getItem('userInfo')
+    if (storedUserInfo) {
+      setUserInfo(JSON.parse(storedUserInfo))
+    } else {
+      // If no user info, redirect to login
+      navigate('/')
+    }
+  }, [navigate])
+
+  const handleLogout = () => {
+    localStorage.removeItem('userInfo')
+    navigate('/')
+  }
+
+  if (!userInfo) {
+    return <div>Loading...</div>
+  }
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -23,12 +46,29 @@ const Dashboard = () => {
         backdropFilter: 'blur(6px)',
         border: '1px solid rgba(255,255,255,0.18)'
       }}>
-        <h1 style={{ 
+        <div style={{
           textAlign: 'center',
-          marginBottom: '40px',
-          color: '#333',
-          fontSize: '2.5rem'
-        }}>DASHBOARD</h1>
+          marginBottom: '30px'
+        }}>
+          <h1 style={{ 
+            marginBottom: '10px',
+            color: '#333',
+            fontSize: '2.5rem'
+          }}>USER DASHBOARD</h1>
+          <p style={{
+            color: '#666',
+            fontSize: '1rem',
+            marginBottom: '10px'
+          }}>
+            Welcome, {userInfo.name}!
+          </p>
+          <p style={{
+            color: '#888',
+            fontSize: '0.9rem'
+          }}>
+            Username: {userInfo.username}
+          </p>
+        </div>
         
         <div style={{
           display: 'flex',
@@ -92,6 +132,24 @@ const Dashboard = () => {
               transition: 'background-color 0.3s'
             }}>RAPID RESPONSE TEAM</button>
           </Link>
+
+          <button 
+            onClick={handleLogout}
+            style={{
+              width: '90%',
+              padding: '12px',
+              fontSize: '1.1rem',
+              backgroundColor: '#6c757d',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'background-color 0.3s',
+              marginTop: '20px'
+            }}
+          >
+            LOGOUT
+          </button>
         </div>
       </div>
     </div>

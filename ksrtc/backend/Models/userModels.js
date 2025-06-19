@@ -14,18 +14,31 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    confirmpassword: {
+        type: String,
+        required: true
+    },
     phone: {
         type: String,
         required: true
     },
     age: {
         type: Number,
-        required: true
+        required: false
     },
     gender: {
         type: String,
-        required: true
+        required: false
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false
     }
-})
-const User = mongoose.model('User', userSchema);
+}, { timestamps: true });
+
+const UserModel = mongoose.model('User', userSchema);
 module.exports = UserModel;

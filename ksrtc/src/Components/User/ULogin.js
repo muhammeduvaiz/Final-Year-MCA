@@ -1,13 +1,51 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import bgImage from '../image/background.png'
-import { Link } from 'react-router-dom'
-
-
+import axios from 'axios'
 
 function ULogin() {
+    const navigate = useNavigate()
+    const [formData, setFormData] = useState({
+        username: '',
+        password: ''
+    })
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState('')
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target
+        setFormData(prevData => ({
+            ...prevData,
+            [name]: value
+        }))
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        setLoading(true)
+        setError('')
+
+        try {
+            const response = await axios.post('http://localhost:5000/user/login', formData, {
+                withCredentials: true
+            })
+
+            if (response.data.message === "user login successfull") {
+                // Store user info in localStorage
+                localStorage.setItem('userInfo', JSON.stringify(response.data.userExist))
+                navigate('/dashboard')
+            } else {
+                setError('Login failed. Please check your credentials.')
+            }
+        } catch (error) {
+            console.error('Login error:', error)
+            setError(error.response?.data?.error || 'Login failed. Please try again.')
+        } finally {
+            setLoading(false)
+        }
+    }
+
     return (
-
-
         <div
             style={{
                 minHeight: '100vh',
@@ -30,7 +68,7 @@ function ULogin() {
                     border: '1px solid rgba(255,255,255,0.18)'
                 }}
             >
-                <h1 style={{ textAlign: 'center' }}>KSRTC CONDUCTOR LOGIN</h1>
+                <h1 style={{ textAlign: 'center' }}>KSRTC USER LOGIN</h1>
                 <div style={{
                     border: '1px solid #ccc',
                     padding: '20px',
@@ -44,7 +82,21 @@ function ULogin() {
                     border: '1px solid rgba(255,255,255,0.18)'
                 }}>
                     <h2>Login</h2>
+                    {error && (
+                        <div style={{
+                            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                            color: '#dc3545',
+                            padding: '10px',
+                            borderRadius: '5px',
+                            marginBottom: '15px',
+                            textAlign: 'center',
+                            border: '1px solid #dc3545'
+                        }}>
+                            {error}
+                        </div>
+                    )}
                     <form
+                        onSubmit={handleSubmit}
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -58,26 +110,44 @@ function ULogin() {
                             alignItems: 'center',
                             width: '100%'
                         }}>
-                            <label htmlFor="username" style={{ marginBottom: '5px' }}>User ID :</label>
-                            <input type="text" id="username" name="username" required style={{ width: '90%', padding: '8px' }} />
+                            <label htmlFor="username" style={{ marginBottom: '5px' }}>Username:</label>
+                            <input 
+                                type="text" 
+                                id="username" 
+                                name="username" 
+                                value={formData.username}
+                                onChange={handleInputChange}
+                                required 
+                                style={{ width: '90%', padding: '8px' }} 
+                            />
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-                            <label htmlFor="password" style={{ marginBottom: '5px' }}>Password :</label>
-                            <input type="password" id="password" name="password" required style={{ width: '90%', padding: '8px' }} />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-                            <label htmlFor="busid" style={{ marginBottom: '5px' }}>Bus ID :</label>
-                            <input type="text" id="busid" name="busid" required style={{ width: '90%', padding: '8px' }} />
+                        <div style={{ 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            alignItems: 'center', 
+                            width: '100%' 
+                        }}>
+                            <label htmlFor="password" style={{ marginBottom: '5px' }}>Password:</label>
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                value={formData.password}
+                                onChange={handleInputChange}
+                                required 
+                                style={{ width: '90%', padding: '8px' }} 
+                            />
                         </div>
                         <button
                             type="submit"
+                            disabled={loading}
                             style={{
-                                backgroundColor: 'red',
+                                backgroundColor: loading ? '#6c757d' : 'red',
                                 color: '#fff',
                                 border: 'none',
                                 padding: '10px',
                                 borderRadius: '4px',
-                                cursor: 'pointer',
+                                cursor: loading ? 'not-allowed' : 'pointer',
                                 width: '100%',
                                 display: 'flex',
                                 justifyContent: 'center',
@@ -87,12 +157,22 @@ function ULogin() {
                                 marginTop: '20px'
                             }}
                         >
-                            Login
+                            {loading ? 'Logging in...' : 'Login'}
                         </button>
                     </form>
                     <div>
                         <p style={{ textAlign: 'center', marginTop: '20px' }}>
-                            <Link to="/admin" style={{ textDecoration: 'none' }}>Admin Login</Link></p>
+                            <a 
+                                href="/admin" 
+                                style={{ 
+                                    textDecoration: 'none', 
+                                    color: '#007bff',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                Admin Login
+                            </a>
+                        </p>
                     </div>
                 </div>
             </div>
