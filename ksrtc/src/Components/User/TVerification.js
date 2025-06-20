@@ -6,6 +6,8 @@ import axios from 'axios'
 const TVerification = () => {
   const [pnr, setPnr] = useState('')
   const [verificationResult, setVerificationResult] = useState(null)
+  const [ticketDetails, setTicketDetails] = useState(null)
+  const [showPopup, setShowPopup] = useState(false)
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
@@ -18,32 +20,33 @@ const TVerification = () => {
 
     setLoading(true)
     setVerificationResult(null)
+    setTicketDetails(null)
+    setShowPopup(false)
 
     try {
-      // First, verify the ticket exists
-      const ticketResponse = await axios.post('http://localhost:5000/ticketverify', { pnr })
+      const response = await axios.post('http://localhost:5000/ticketverify', { pnr })
       
-      // Then check if PNR exists in accident database
-      const accidentResponse = await axios.get(`http://localhost:5000/checkAccidentPNR/${pnr}`)
-      
-      const isInAccidentDB = accidentResponse.data.exists
-      
-      setVerificationResult({
-        ticketExists: true,
-        isInAccidentDB,
-        verified: isInAccidentDB,
-        message: isInAccidentDB 
-          ? 'PNR verified successfully! This ticket is associated with an accident report.'
-          : 'PNR verified successfully! This ticket is not associated with any accident report.'
-      })
+      if (response.data.success) {
+        setTicketDetails(response.data.ticketDetails)
+        setShowPopup(true)
+        setVerificationResult({
+          success: true,
+          message: 'PNR verified successfully!'
+        })
+      }
     } catch (error) {
       console.error('Verification error:', error)
-      setVerificationResult({
-        ticketExists: false,
-        isInAccidentDB: false,
-        verified: false,
-        message: 'PNR not found in ticket database.'
-      })
+      if (error.response && error.response.status === 404) {
+        setVerificationResult({
+          success: false,
+          message: 'Invalid PNR - Ticket not found'
+        })
+      } else {
+        setVerificationResult({
+          success: false,
+          message: 'Error occurred during verification. Please try again.'
+        })
+      }
     } finally {
       setLoading(false)
     }
@@ -51,6 +54,11 @@ const TVerification = () => {
 
   const handleBack = () => {
     navigate('/dashboard')
+  }
+
+  const closePopup = () => {
+    setShowPopup(false)
+    setTicketDetails(null)
   }
 
   return (
@@ -142,34 +150,20 @@ const TVerification = () => {
           </button>
         </form>
 
-        {verificationResult && (
+        {verificationResult && !verificationResult.success && (
           <div style={{
             marginTop: '30px',
             padding: '20px',
             borderRadius: '8px',
-            backgroundColor: verificationResult.verified 
-              ? 'rgba(40, 167, 69, 0.1)' 
-              : verificationResult.ticketExists 
-                ? 'rgba(255, 193, 7, 0.1)' 
-                : 'rgba(220, 53, 69, 0.1)',
-            border: `2px solid ${
-              verificationResult.verified 
-                ? '#28a745' 
-                : verificationResult.ticketExists 
-                  ? '#ffc107' 
-                  : '#dc3545'
-            }`
+            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+            border: '2px solid #dc3545'
           }}>
             <h3 style={{
               textAlign: 'center',
-              color: verificationResult.verified 
-                ? '#28a745' 
-                : verificationResult.ticketExists 
-                  ? '#ffc107' 
-                  : '#dc3545',
+              color: '#dc3545',
               marginBottom: '10px'
             }}>
-              {verificationResult.verified ? '✅ VERIFIED' : verificationResult.ticketExists ? '⚠️ TICKET FOUND' : '❌ NOT FOUND'}
+              ❌ INVALID PNR
             </h3>
             <p style={{
               textAlign: 'center',
@@ -179,24 +173,141 @@ const TVerification = () => {
             }}>
               {verificationResult.message}
             </p>
-            {verificationResult.ticketExists && (
-              <div style={{
-                marginTop: '15px',
-                padding: '10px',
-                backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                borderRadius: '5px',
-                border: '1px solid #007bff'
+          </div>
+        )}
+
+        {/* Ticket Details Popup */}
+        {showPopup && ticketDetails && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000
+          }}>
+            <div style={{
+              background: 'white',
+              padding: '30px',
+              borderRadius: '16px',
+              maxWidth: '500px',
+              width: '90%',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+              position: 'relative'
+            }}>
+              <h2 style={{
+                textAlign: 'center',
+                color: '#28a745',
+                marginBottom: '25px',
+                fontSize: '1.8rem'
               }}>
-                <p style={{
-                  textAlign: 'center',
-                  color: '#007bff',
-                  fontSize: '0.9rem',
-                  margin: '0'
+                ✅ TICKET VERIFIED
+              </h2>
+              
+              <div style={{
+                display: 'grid',
+                gap: '15px',
+                marginBottom: '25px'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '10px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '8px'
                 }}>
-                  <strong>Status:</strong> {verificationResult.isInAccidentDB ? 'Associated with accident report' : 'No accident report found'}
-                </p>
+                  <strong>PNR:</strong>
+                  <span>{ticketDetails.pnr}</span>
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '10px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '8px'
+                }}>
+                  <strong>Date:</strong>
+                  <span>{ticketDetails.date || 'Not specified'}</span>
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '10px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '8px'
+                }}>
+                  <strong>Source:</strong>
+                  <span>{ticketDetails.source}</span>
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '10px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '8px'
+                }}>
+                  <strong>Destination:</strong>
+                  <span>{ticketDetails.destination}</span>
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '10px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '8px'
+                }}>
+                  <strong>Adults:</strong>
+                  <span>{ticketDetails.adult}</span>
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '10px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '8px'
+                }}>
+                  <strong>Children:</strong>
+                  <span>{ticketDetails.child}</span>
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '10px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '8px'
+                }}>
+                  <strong>Price:</strong>
+                  <span>₹{ticketDetails.price}</span>
+                </div>
               </div>
-            )}
+              
+              <button
+                onClick={closePopup}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  fontSize: '1.1rem',
+                  backgroundColor: '#28a745',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.3s'
+                }}
+              >
+                OK
+              </button>
+            </div>
           </div>
         )}
       </div>
