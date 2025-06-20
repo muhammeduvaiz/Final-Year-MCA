@@ -67,17 +67,22 @@ function ADashboard() {
           gap: '20px',
           width: '100%'
         }}>
-          <button style={{
-            width: '100%',
-            padding: '15px',
-            fontSize: '1.1rem',
-            backgroundColor: '#dc3545',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s'
-          }}>ALERTS</button>
+          <button 
+            onClick={() => navigate('/adminalerts')}
+            style={{
+              width: '100%',
+              padding: '15px',
+              fontSize: '1.1rem',
+              backgroundColor: '#dc3545',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'background-color 0.3s'
+            }}
+          >
+            ALERTS
+          </button>
           
           <button 
             onClick={() => navigate('/manageusers')}

@@ -8,6 +8,7 @@ import AccidentReport from './Components/User/AccidentReport'
 import Rrt from './Components/User/Rrt'
 import ADashboard from './Components/Admin/ADashboard'
 import ManageUsers from './Components/Admin/ManageUsers'
+import AdminAlerts from './Components/Admin/AdminAlerts'
 import TicketDetails from './Components/User/TicketDetails'
 import {BrowserRouter,Routes,Route} from 'react-router-dom'
 function App() {
@@ -24,6 +25,7 @@ function App() {
           <Route path='/rrt' element={<Rrt/>}/>
           <Route path='/adashboard' element={<ADashboard/>}/>
           <Route path='/manageusers' element={<ManageUsers/>}/>
+          <Route path='/adminalerts' element={<AdminAlerts/>}/>
           <Route path='/ticketdetails' element={<TicketDetails/>}/>
         </Routes>
       </BrowserRouter>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import bgImage from '../image/background.png'
 
 function AccidentReport() {
@@ -9,9 +9,18 @@ function AccidentReport() {
         accidentTime: '',
         casualties: ''
     })
-    const [image, setImage] = useState(null)
+    const [images, setImages] = useState([])
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [message, setMessage] = useState('')
+    const [userInfo, setUserInfo] = useState(null)
+
+    useEffect(() => {
+        // Get user info from localStorage
+        const storedUserInfo = localStorage.getItem('userInfo')
+        if (storedUserInfo) {
+            setUserInfo(JSON.parse(storedUserInfo))
+        }
+    }, [])
 
     const handleInputChange = (e) => {
         const { name, value } = e.target
@@ -22,13 +31,24 @@ function AccidentReport() {
     }
 
     const handleImageChange = (e) => {
-        setImage(e.target.files[0])
+        const files = Array.from(e.target.files)
+        if (files.length > 2) {
+            setMessage('Maximum 2 images allowed')
+            return
+        }
+        setImages(files)
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
         setIsSubmitting(true)
         setMessage('')
+
+        if (!userInfo) {
+            setMessage('User information not found. Please login again.')
+            setIsSubmitting(false)
+            return
+        }
 
         try {
             const formDataToSend = new FormData()
@@ -38,9 +58,15 @@ function AccidentReport() {
             formDataToSend.append('accidentTime', formData.accidentTime)
             formDataToSend.append('casualties', formData.casualties)
             
-            if (image) {
-                formDataToSend.append('image', image)
-            }
+            // Add conductor details
+            formDataToSend.append('conductorName', userInfo.name)
+            formDataToSend.append('conductorPhone', userInfo.phone)
+            formDataToSend.append('conductorUsername', userInfo.username)
+            
+            // Add multiple images
+            images.forEach((image, index) => {
+                formDataToSend.append('images', image)
+            })
 
             const response = await fetch('http://localhost:5000/addAccidentData', {
                 method: 'POST',
@@ -50,7 +76,7 @@ function AccidentReport() {
             const result = await response.json()
 
             if (result.success) {
-                setMessage(`Accident report submitted successfully! ${result.pnrCount} PNRs automatically included.`)
+                setMessage(`Accident report submitted successfully! ${result.pnrCount} passenger tickets automatically included.`)
                 setFormData({
                     location: '',
                     accidentDescription: '',
@@ -58,7 +84,7 @@ function AccidentReport() {
                     accidentTime: '',
                     casualties: ''
                 })
-                setImage(null)
+                setImages([])
             } else {
                 setMessage(result.message || 'Failed to submit report. Please try again.')
             }
@@ -105,8 +131,23 @@ function AccidentReport() {
                     border: '1px solid #b3d9ff',
                     fontSize: '0.9rem'
                 }}>
-                    ℹ️ All active PNRs from the ticket database will be automatically included in this report.
+                    ℹ️ All active passenger tickets from the database will be automatically included in this report.
                 </div>
+
+                {userInfo && (
+                    <div style={{
+                        padding: '10px',
+                        marginBottom: '20px',
+                        borderRadius: '8px',
+                        textAlign: 'center',
+                        backgroundColor: '#d4edda',
+                        color: '#155724',
+                        border: '1px solid #c3e6cb',
+                        fontSize: '0.9rem'
+                    }}>
+                        📋 Conductor: {userInfo.name} | Phone: {userInfo.phone}
+                    </div>
+                )}
                 
                 {message && (
                     <div style={{
@@ -227,13 +268,14 @@ function AccidentReport() {
                         flexDirection: 'column',
                         gap: '8px'
                     }}>
-                        <label htmlFor='image' style={{ fontSize: '1.1rem', color: '#333' }}>Image</label>
+                        <label htmlFor='images' style={{ fontSize: '1.1rem', color: '#333' }}>Images (Max 2)</label>
                         <input
                             type='file'
-                            id='image'
-                            name='image'
+                            id='images'
+                            name='images'
                             onChange={handleImageChange}
                             accept='image/*'
+                            multiple
                             style={{
                                 padding: '10px',
                                 borderRadius: '8px',
@@ -243,6 +285,11 @@ function AccidentReport() {
                             }}
                             required
                         />
+                        {images.length > 0 && (
+                            <div style={{ fontSize: '0.9rem', color: '#666' }}>
+                                Selected: {images.length} image(s)
+                            </div>
+                        )}
                     </div>
 
                     <div style={{
