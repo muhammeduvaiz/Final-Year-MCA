@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import bgImage from '../image/background.png'
 import axios from 'axios'
+import { toast } from 'react-toastify'
 
 function AdminAlerts() {
   const [rrtRequests, setRrtRequests] = useState([])
   const [accidentReports, setAccidentReports] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('rrt')
-  const [message, setMessage] = useState('')
+  const [zoomedImage, setZoomedImage] = useState(null)
 
   useEffect(() => {
     fetchData()
@@ -30,7 +31,7 @@ function AdminAlerts() {
       }
     } catch (error) {
       console.error('Error fetching data:', error)
-      setMessage('Error loading data')
+      toast.error('Error loading data')
     } finally {
       setLoading(false)
     }
@@ -52,12 +53,12 @@ function AdminAlerts() {
       }
 
       if (response.data.success) {
-        setMessage(`${type.toUpperCase()} request ${status} successfully`)
+        toast.success(`${type.toUpperCase()} request ${status} successfully`)
         fetchData() // Refresh data
       }
     } catch (error) {
       console.error('Error updating status:', error)
-      setMessage('Error updating status')
+      toast.error('Error updating status')
     }
   }
 
@@ -109,20 +110,6 @@ function AdminAlerts() {
           color: '#333',
           fontSize: '2.5rem'
         }}>ADMIN ALERTS</h1>
-
-        {message && (
-          <div style={{
-            padding: '10px',
-            marginBottom: '20px',
-            borderRadius: '8px',
-            textAlign: 'center',
-            backgroundColor: message.includes('successfully') ? '#d4edda' : '#f8d7da',
-            color: message.includes('successfully') ? '#155724' : '#721c24',
-            border: `1px solid ${message.includes('successfully') ? '#c3e6cb' : '#f5c6cb'}`
-          }}>
-            {message}
-          </div>
-        )}
 
         {/* Tab Navigation */}
         <div style={{
@@ -382,14 +369,19 @@ function AdminAlerts() {
                           {report.images.map((image, index) => (
                             <img 
                               key={index}
-                              src={`http://localhost:5000/${image}`} 
+                              src={`http://localhost:5000/${image.replace(/\\/g, '/')}`} 
                               alt={`Accident ${index + 1}`} 
                               style={{
                                 maxWidth: '200px',
                                 maxHeight: '200px',
                                 borderRadius: '4px',
-                                border: '1px solid #dee2e6'
+                                border: '1px solid #dee2e6',
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s'
                               }}
+                              onClick={() => setZoomedImage(`http://localhost:5000/${image.replace(/\\/g, '/')}`)}
+                              onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                              onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
                             />
                           ))}
                         </div>
@@ -409,6 +401,37 @@ function AdminAlerts() {
           </div>
         )}
       </div>
+
+      {zoomedImage && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1001,
+            cursor: 'pointer'
+          }}
+          onClick={() => setZoomedImage(null)}
+        >
+          <img 
+            src={zoomedImage} 
+            alt="Zoomed-in accident"
+            style={{
+              maxWidth: '90%',
+              maxHeight: '90%',
+              objectFit: 'contain',
+              border: '3px solid white',
+              borderRadius: '8px'
+            }}
+          />
+        </div>
+      )}
     </div>
   )
 }

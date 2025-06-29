@@ -5,7 +5,7 @@ const { addRrtRequest, getAllRrtRequests, updateRrtStatus, deleteRrtRequest } = 
 const upload = require('./Middlewares/multer');
 const userRouter = require('./userRoutes');
 const adminRouter = require('./adminRoutes'); 
-
+const rrtRouter = require('./rrtRoutes');
 
 const router = require('express').Router();
 
@@ -13,9 +13,10 @@ const router = require('express').Router();
 router.use('/user', userRouter);
 //admin routes
 router.use('/admin', adminRouter);
+// RRT routes
+router.use('/rrt', rrtRouter);
 // Ticket routes
 router.post('/addTicket', addTicket);
-
 
 // Accident report routes - handle multiple images
 router.post('/addAccidentData', upload.array('images', 2), addAccidentData);
@@ -35,6 +36,5 @@ router.delete('/deleteRrtRequest/:id', deleteRrtRequest);
 router.get('/getAllAccidentReports', getAllAccidentReports);
 router.put('/updateAccidentStatus/:id', updateAccidentStatus);
 router.delete('/deleteAccidentReport/:id', deleteAccidentReport);
-
 
 module.exports = router;

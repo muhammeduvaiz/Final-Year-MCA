@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import bgImage from '../image/background.png'
+import { toast } from 'react-toastify'
 
 function ADashboard() {
   const navigate = useNavigate()
@@ -18,6 +19,7 @@ function ADashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem('adminInfo')
+    toast.success('Logged out successfully')
     navigate('/admin')
   }
 
@@ -101,17 +103,19 @@ function ADashboard() {
             MANAGE USERS
           </button>
           
-          <button style={{
-            width: '100%',
-            padding: '15px',
-            fontSize: '1.1rem',
-            backgroundColor: '#28a745',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s'
-          }}>MANAGE BUSES</button>
+          <button 
+            onClick={() => navigate('/managerrt')}
+            style={{
+              width: '100%',
+              padding: '15px',
+              fontSize: '1.1rem',
+              backgroundColor: '#28a745',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'background-color 0.3s'
+            }}>MANAGE RAPID RESPONSE TEAM</button>
 
           <button 
             onClick={handleLogout}

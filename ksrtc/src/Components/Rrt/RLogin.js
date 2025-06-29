@@ -4,7 +4,7 @@ import bgImage from '../image/background.png'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 
-function ULogin() {
+function RLogin() {
     const navigate = useNavigate()
     const [formData, setFormData] = useState({
         username: '',
@@ -25,15 +25,19 @@ function ULogin() {
         setLoading(true)
 
         try {
-            const response = await axios.post('http://localhost:5000/user/login', formData, {
+            const response = await axios.post('http://localhost:5000/rrt/login', formData, {
                 withCredentials: true
             })
 
-            if (response.data.message === "user login successfull") {
-                // Store user info in localStorage
-                localStorage.setItem('userInfo', JSON.stringify(response.data.userExist))
-                toast.success('Login successful! Welcome back.')
-                navigate('/dashboard')
+            if (response.data.message === "RRT login successful") {
+                // Store RRT info in localStorage
+                localStorage.setItem('rrtInfo', JSON.stringify({
+                    user: response.data.user,
+                    token: response.data.token,
+                    role: 'rrt'
+                }))
+                toast.success('RRT Login successful! Welcome to Rapid Response Team.')
+                navigate('/rrt-dashboard') // You can create a dedicated RRT dashboard
             } else {
                 toast.error('Login failed. Please check your credentials.')
             }
@@ -68,7 +72,7 @@ function ULogin() {
                     border: '1px solid rgba(255,255,255,0.18)'
                 }}
             >
-                <h1 style={{ textAlign: 'center' }}>KSRTC USER LOGIN</h1>
+                <h1 style={{ textAlign: 'center', color: '#d32f2f' }}>KSRTC RRT LOGIN</h1>
                 <div style={{
                     border: '1px solid #ccc',
                     padding: '20px',
@@ -81,7 +85,7 @@ function ULogin() {
                     backdropFilter: 'blur(6px)',
                     border: '1px solid rgba(255,255,255,0.18)'
                 }}>
-                    <h2>Login</h2>
+                    <h2 style={{ color: '#d32f2f', textAlign: 'center' }}>Rapid Response Team</h2>
                     <form
                         onSubmit={handleSubmit}
                         style={{
@@ -97,7 +101,7 @@ function ULogin() {
                             alignItems: 'center',
                             width: '100%'
                         }}>
-                            <label htmlFor="username" style={{ marginBottom: '5px' }}>Username:</label>
+                            <label htmlFor="username" style={{ marginBottom: '5px', fontWeight: 'bold', color: '#333' }}>Username:</label>
                             <input 
                                 type="text" 
                                 id="username" 
@@ -105,7 +109,15 @@ function ULogin() {
                                 value={formData.username}
                                 onChange={handleInputChange}
                                 required 
-                                style={{ width: '90%', padding: '8px' }} 
+                                style={{ 
+                                    width: '90%', 
+                                    padding: '12px',
+                                    borderRadius: '8px',
+                                    border: '2px solid #ddd',
+                                    fontSize: '16px',
+                                    transition: 'border-color 0.3s ease'
+                                }}
+                                placeholder="Enter your username"
                             />
                         </div>
                         <div style={{ 
@@ -114,7 +126,7 @@ function ULogin() {
                             alignItems: 'center', 
                             width: '100%' 
                         }}>
-                            <label htmlFor="password" style={{ marginBottom: '5px' }}>Password:</label>
+                            <label htmlFor="password" style={{ marginBottom: '5px', fontWeight: 'bold', color: '#333' }}>Password:</label>
                             <input 
                                 type="password" 
                                 id="password" 
@@ -122,18 +134,26 @@ function ULogin() {
                                 value={formData.password}
                                 onChange={handleInputChange}
                                 required 
-                                style={{ width: '90%', padding: '8px' }} 
+                                style={{ 
+                                    width: '90%', 
+                                    padding: '12px',
+                                    borderRadius: '8px',
+                                    border: '2px solid #ddd',
+                                    fontSize: '16px',
+                                    transition: 'border-color 0.3s ease'
+                                }}
+                                placeholder="Enter your password"
                             />
                         </div>
                         <button
                             type="submit"
                             disabled={loading}
                             style={{
-                                backgroundColor: loading ? '#6c757d' : 'red',
+                                backgroundColor: loading ? '#6c757d' : '#d32f2f',
                                 color: '#fff',
                                 border: 'none',
-                                padding: '10px',
-                                borderRadius: '4px',
+                                padding: '12px',
+                                borderRadius: '8px',
                                 cursor: loading ? 'not-allowed' : 'pointer',
                                 width: '100%',
                                 display: 'flex',
@@ -141,14 +161,45 @@ function ULogin() {
                                 alignItems: 'center',
                                 fontSize: '16px',
                                 fontWeight: 'bold',
-                                marginTop: '20px'
+                                marginTop: '20px',
+                                transition: 'background-color 0.3s ease',
+                                boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                            }}
+                            onMouseOver={(e) => {
+                                if (!loading) {
+                                    e.target.style.backgroundColor = '#b71c1c'
+                                }
+                            }}
+                            onMouseOut={(e) => {
+                                if (!loading) {
+                                    e.target.style.backgroundColor = '#d32f2f'
+                                }
                             }}
                         >
                             {loading ? 'Logging in...' : 'Login'}
                         </button>
                     </form>
-                    <div>
-                        <p style={{ textAlign: 'center', marginTop: '20px' }}>
+                    <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                        <p style={{ marginBottom: '10px', color: '#666' }}>
+                            <strong>Login with your RRT credentials</strong>
+                        </p>
+                        <p style={{ fontSize: '14px', color: '#888' }}>
+                            Use the username and password provided by your administrator
+                        </p>
+                    </div>
+                    <div style={{ marginTop: '20px' }}>
+                        <p style={{ textAlign: 'center', marginBottom: '10px' }}>
+                            <a 
+                                href="/" 
+                                style={{ 
+                                    textDecoration: 'none', 
+                                    color: '#007bff',
+                                    fontWeight: 'bold',
+                                    marginRight: '20px'
+                                }}
+                            >
+                                User Login
+                            </a>
                             <a 
                                 href="/admin" 
                                 style={{ 
@@ -161,24 +212,10 @@ function ULogin() {
                             </a>
                         </p>
                     </div>
-                    <div>
-                        <p style={{ textAlign: 'center', marginTop: '20px' }}>
-                            <a 
-                                href="/rrt-login" 
-                                style={{ 
-                                    textDecoration: 'none', 
-                                    color: '#007bff',
-                                    fontWeight: 'bold'
-                                }}
-                            >
-                                Rrt Login
-                            </a>
-                        </p>
-                    </div>
                 </div>
             </div>
         </div>
     )
 }
 
-export default ULogin
+export default RLogin

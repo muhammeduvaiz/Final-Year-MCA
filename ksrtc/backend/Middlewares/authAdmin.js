@@ -3,6 +3,7 @@ const jwt= require("jsonwebtoken");
 const authAdmin = (req, res,next) => {
     try{
         console.log('Admin auth middleware - cookies:', req.cookies);
+        console.log('Admin auth middleware - headers:', req.headers);
         const{Admin_token}=req.cookies;
         console.log('Admin token found:', !!Admin_token);
         

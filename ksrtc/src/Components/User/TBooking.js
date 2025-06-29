@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import bgImage from '../image/background.png'
 import axios from 'axios'
+import { toast } from 'react-toastify'
 
 // Define the order of cities from south to north
 const CITY_ORDER = ['Trivandrum', 'Kollam', 'Kochi', 'Kannur', 'Kasaragod']
@@ -56,11 +57,12 @@ const TBooking = () => {
     try {
       // Send POST request to backend
       await axios.post('http://localhost:5000/addTicket', ticketData)
-
+      
+      toast.success('Ticket booked successfully!')
       // On success, navigate to TicketDetails
       navigate('/ticketdetails', { state: ticketData })
     } catch (error) {
-      alert('Failed to save ticket. Please try again.')
+      toast.error('Failed to save ticket. Please try again.')
       console.log(error)
     }
   }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import bgImage from '../image/background.png'
+import { toast } from 'react-toastify'
 
 function Rrt() {
   const [formData, setFormData] = useState({
@@ -9,7 +10,6 @@ function Rrt() {
     time: ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [message, setMessage] = useState('')
   const [userInfo, setUserInfo] = useState(null)
 
   useEffect(() => {
@@ -31,10 +31,9 @@ function Rrt() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
-    setMessage('')
 
     if (!userInfo) {
-      setMessage('User information not found. Please login again.')
+      toast.error('User information not found. Please login again.')
       setIsSubmitting(false)
       return
     }
@@ -58,7 +57,7 @@ function Rrt() {
       const result = await response.json()
 
       if (result.success) {
-        setMessage(`RRT request submitted successfully! ${result.pnrCount} passenger tickets automatically included.`)
+        toast.success(`RRT request submitted successfully! ${result.pnrCount} passenger tickets automatically included.`)
         setFormData({
           location: '',
           description: '',
@@ -66,11 +65,11 @@ function Rrt() {
           time: ''
         })
       } else {
-        setMessage(result.message || 'Failed to submit request. Please try again.')
+        toast.error(result.message || 'Failed to submit request. Please try again.')
       }
     } catch (error) {
       console.error('Error submitting RRT request:', error)
-      setMessage('Error submitting request. Please check your connection.')
+      toast.error('Error submitting request. Please check your connection.')
     } finally {
       setIsSubmitting(false)
     }
@@ -126,20 +125,6 @@ function Rrt() {
             fontSize: '0.9rem'
           }}>
             📋 Conductor: {userInfo.name} | Phone: {userInfo.phone}
-          </div>
-        )}
-
-        {message && (
-          <div style={{
-            padding: '10px',
-            marginBottom: '20px',
-            borderRadius: '8px',
-            textAlign: 'center',
-            backgroundColor: message.includes('successfully') ? '#d4edda' : '#f8d7da',
-            color: message.includes('successfully') ? '#155724' : '#721c24',
-            border: `1px solid ${message.includes('successfully') ? '#c3e6cb' : '#f5c6cb'}`
-          }}>
-            {message}
           </div>
         )}
 

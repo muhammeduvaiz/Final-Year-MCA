@@ -4,10 +4,10 @@ const TicketModel = require('../Models/ticketModel');
 module.exports = { 
     addAccidentData: async (req, res) => {
        try{
-        const {location, accidentDescription, accidentDate, accidentTime, casualties} = req.body;
+        const {location, accidentDescription, accidentDate, accidentTime, casualties, conductorName, conductorPhone, conductorUsername} = req.body;
         
         // Handle multiple images
-        const images = req.files ? req.files.map(file => file.path) : [];
+        const images = req.files ? req.files.map(file => file.path.replace(/\\/g, '/')) : [];
         
         if (images.length === 0) {
             return res.status(400).json({
@@ -18,9 +18,9 @@ module.exports = {
         
         // Get conductor details from user info (assuming it's passed in request)
         const conductorDetails = {
-            name: req.body.conductorName || 'Unknown',
-            phone: req.body.conductorPhone || 'Unknown',
-            username: req.body.conductorUsername || 'Unknown'
+            name: conductorName || 'Unknown',
+            phone: conductorPhone || 'Unknown',
+            username: conductorUsername || 'Unknown'
         };
         
         // Automatically fetch all active tickets from ticket database
@@ -51,16 +51,24 @@ module.exports = {
             status: 'pending'
         });
         
-        await accidentData.save();
+       const savedAccidentData = await accidentData.save();
+       if(savedAccidentData){
         
         res.status(200).json({
             success: true,
-            message: "Accident report added successfully",
+            message: `Accident report added successfully ${passengerTickets.length} passenger tickets automatically included.`,
             statusCode: 200,
             images: images,
             pnrCount: passengerTickets.length,
             passengerTickets: passengerTickets
         });
+       }else{
+        res.status(500).json({
+            success: false,
+            message: "Failed to add accident report",
+            statusCode: 500,
+        });
+       }
        }catch(error){
            res.status(500).json({
                success: false,

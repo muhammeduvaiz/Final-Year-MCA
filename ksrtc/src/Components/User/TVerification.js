@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import bgImage from '../image/background.png'
 import axios from 'axios'
+import { toast } from 'react-toastify'
 
 const TVerification = () => {
   const [pnr, setPnr] = useState('')
@@ -14,7 +15,7 @@ const TVerification = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!pnr.trim()) {
-      alert('Please enter a PNR number')
+      toast.error('Please enter a PNR number')
       return
     }
 
@@ -33,6 +34,7 @@ const TVerification = () => {
           success: true,
           message: 'PNR verified successfully!'
         })
+        toast.success('PNR verified successfully!')
       }
     } catch (error) {
       console.error('Verification error:', error)
@@ -41,11 +43,13 @@ const TVerification = () => {
           success: false,
           message: 'Invalid PNR - Ticket not found'
         })
+        toast.error('Invalid PNR - Ticket not found')
       } else {
         setVerificationResult({
           success: false,
           message: 'Error occurred during verification. Please try again.'
         })
+        toast.error('Error occurred during verification. Please try again.')
       }
     } finally {
       setLoading(false)
