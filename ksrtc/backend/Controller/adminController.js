@@ -54,7 +54,15 @@ const login = async (req, res) => {
             return res.status(400).json({ error: "Passwords does not match" })
         }
         const token = createToken(adminExist._id,"admin")
-        res.cookie("Admin_token", token, { sameSite: "None", secure: true });
+        
+        // Set cookie with more compatible settings for development
+        res.cookie("Admin_token", token, { 
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production', // Only secure in production
+            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+            maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        });
+        
         return res.status(200).json({ message: "admin login successfull", adminExist })
 
     } catch (error) {
@@ -66,7 +74,11 @@ const login = async (req, res) => {
 const logout= async(req,res)=>{
     try {
 
-        res.clearCookie("Admin_token");
+        res.clearCookie("Admin_token", { 
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax'
+        });
         return res.status(200).json({ message: "Logout successful" })
         
     } catch (error) {

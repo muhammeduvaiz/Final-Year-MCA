@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import bgImage from '../image/background.png'  
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { toast } from 'react-toastify'
 
 function ALogin() {
   const navigate = useNavigate()
@@ -10,7 +11,6 @@ function ALogin() {
     password: ''
   })
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
 
   const handleChange = (e) => {
     setFormData({
@@ -22,7 +22,6 @@ function ALogin() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    setError('')
 
     try {
       const response = await axios.post('http://localhost:5000/admin/login', formData, {
@@ -32,13 +31,14 @@ function ALogin() {
       if (response.data.message === "admin login successfull") {
         // Store admin info in localStorage or state management
         localStorage.setItem('adminInfo', JSON.stringify(response.data.adminExist))
+        toast.success('Admin login successful! Welcome.')
         navigate('/adashboard')
       } else {
-        setError('Login failed. Please check your credentials.')
+        toast.error('Login failed. Please check your credentials.')
       }
     } catch (error) {
       console.error('Login error:', error)
-      setError(error.response?.data?.error || 'Login failed. Please try again.')
+      toast.error(error.response?.data?.error || 'Login failed. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -81,19 +81,6 @@ function ALogin() {
           border: '1px solid rgba(255,255,255,0.18)'
         }}>
           <h2>Login</h2>
-          {error && (
-            <div style={{
-              backgroundColor: 'rgba(220, 53, 69, 0.1)',
-              color: '#dc3545',
-              padding: '10px',
-              borderRadius: '5px',
-              marginBottom: '15px',
-              textAlign: 'center',
-              border: '1px solid #dc3545'
-            }}>
-              {error}
-            </div>
-          )}
           <form
             onSubmit={handleSubmit}
             style={{
